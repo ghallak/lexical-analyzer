@@ -35,52 +35,52 @@ public:
 		return head == tail && head == nullptr;
 	}
 
-	void concat(NFA&& nfa)
+	NFA& operator+=(NFA&& nfa)
 	{
-		tail->next.push_back(std::make_pair('\0', nfa.head));
-		tail = nfa.tail;
+		if (empty()) {
+			*this = std::move(nfa);
+		}
+		else {
+			tail->next.push_back(std::make_pair('\0', nfa.head));
+			tail = nfa.tail;
 
-		states.insert(states.end(),
-		              make_move_iterator(nfa.states.begin()),
-		              make_move_iterator(nfa.states.end()));
+			states.insert(states.end(),
+						make_move_iterator(nfa.states.begin()),
+						make_move_iterator(nfa.states.end()));
+		}
+
+		return *this;
 	}
 
-	void make_union(NFA&& nfa)
+	NFA& operator|=(NFA&& nfa)
 	{
-		states.emplace_back(std::make_unique<State>());
-		auto new_head = states.back().get();
-		states.emplace_back(std::make_unique<State>());
-		auto new_tail = states.back().get();
+		if (empty()) {
+			*this = std::move(nfa);
+		}
+		else {
+			states.emplace_back(std::make_unique<State>());
+			auto new_head = states.back().get();
+			states.emplace_back(std::make_unique<State>());
+			auto new_tail = states.back().get();
 
-		new_head->next.push_back(std::make_pair('\0', head));
-		new_head->next.push_back(std::make_pair('\0', nfa.head));
+			new_head->next.push_back(std::make_pair('\0', head));
+			new_head->next.push_back(std::make_pair('\0', nfa.head));
 
-		tail->next.push_back(std::make_pair('\0', new_tail));
-		nfa.tail->next.push_back(std::make_pair('\0', new_tail));
+			tail->next.push_back(std::make_pair('\0', new_tail));
+			nfa.tail->next.push_back(std::make_pair('\0', new_tail));
 
-		head = new_head;
-		tail = new_tail;
+			head = new_head;
+			tail = new_tail;
 
-		states.insert(states.end(),
-		              std::make_move_iterator(nfa.states.begin()),
-		              std::make_move_iterator(nfa.states.end()));
+			states.insert(states.end(),
+						std::make_move_iterator(nfa.states.begin()),
+						std::make_move_iterator(nfa.states.end()));
+		}
+		
+		return *this;
 	}
 
-	void make_kleen()
-	{
-		states.emplace_back(std::make_unique<State>());
-		auto new_head = states.back().get();
-		states.emplace_back(std::make_unique<State>());
-		auto new_tail = states.back().get();
-
-		tail->next.push_back(std::make_pair('\0', head));
-		tail->next.push_back(std::make_pair('\0', new_tail));
-		new_head->next.push_back(std::make_pair('\0', head));
-		new_head->next.push_back(std::make_pair('\0', new_tail));
-
-		head = new_head;
-		tail = new_tail;
-	}
+	friend NFA operator*(NFA&& nfa);
 
 	void print()
 	{
@@ -105,6 +105,24 @@ private:
 	State *tail;
 	std::vector<std::unique_ptr<State>> states;
 };
+
+NFA operator*(NFA&& nfa)
+{
+	nfa.states.emplace_back(std::make_unique<NFA::State>());
+	auto new_head = nfa.states.back().get();
+	nfa.states.emplace_back(std::make_unique<NFA::State>());
+	auto new_tail = nfa.states.back().get();
+
+	nfa.tail->next.push_back(std::make_pair('\0', nfa.head));
+	nfa.tail->next.push_back(std::make_pair('\0', new_tail));
+	new_head->next.push_back(std::make_pair('\0', nfa.head));
+	new_head->next.push_back(std::make_pair('\0', new_tail));
+
+	nfa.head = new_head;
+	nfa.tail = new_tail;
+
+	return std::move(nfa);
+}
 
 int find_close(const std::string& s, int idx)
 {
@@ -133,37 +151,27 @@ NFA construct(const std::string& s, int begin, int end)
 	NFA current;
 	for (int i = begin; i < end; ++i)
 	{
-		std::cout << i << std::endl;
 		if (s[i] == '|') {
-			current.make_union(construct(s, i + 1, end));
+			current |= construct(s, i + 1, end);
 			i = end;
 		}
 		else if (s[i] == '(') {
 			int close = find_close(s, i);
-			NFA tmp = construct(s, i + 1, close);
 			if (close + 1 < end && s[close + 1] == '*') {
-				tmp.make_kleen();
+				current += *construct(s, i + 1, close);
 				i = close + 1;
 			}
 			else {
+				current += construct(s, i + 1, close);
 				i = close;
 			}
-			if (current.empty())
-				current = std::move(tmp);
-			else
-				current.concat(std::move(tmp));
 		}
 		else if (i + 1 < end && s[i + 1] == '*') {
-			NFA tmp(s[i]);
-			tmp.make_kleen();
-			current.concat(std::move(tmp));
+			current += *NFA(s[i]);
 			++i;
 		}
 		else {
-			if (current.empty())
-				current = NFA(s[i]);
-			else
-				current.concat(NFA(s[i]));
+			current += NFA(s[i]);
 		}
 	}
 
