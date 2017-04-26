@@ -88,9 +88,9 @@ void NFA::print()
 		auto p = states[i].get();
 		for (auto s : p->next) {
 			std::cout << "from state #" << p->state_number
-						<< " through: " << (s.first == '\0' ? 'E' : s.first)
-						<< " to state #" << s.second->state_number
-						<< '\n';
+			          << " through: " << (s.first == '\0' ? 'E' : s.first)
+			          << " to state #" << s.second->state_number
+			          << '\n';
 		}
 		std::cout << "--------------\n\n";
 	}
