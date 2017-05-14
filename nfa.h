@@ -13,30 +13,27 @@ private:
 		// TODO: variabl state_number is for debugging purpose
 		// and should be removed later
 		int state_number;
-		std::vector<std::pair<char, State*>> next;
+		std::vector<std::pair<char, State*>> adjacent;
 	};
 
 public:
 	NFA() : head(nullptr), tail(nullptr)
 	{ }
 
-	explicit NFA(const std::string& s)
-	{
-		*this = construct(s, 0, s.length());
-	}
+	explicit NFA(const std::string& s);
 
 	explicit NFA(char c);
 
 	bool empty()
-	{
-		return head == tail && head == nullptr;
-	}
+	{ return head == tail && head == nullptr; }
 
 	NFA& operator+=(NFA&& rhs);
 
 	NFA& operator|=(NFA&& rhs);
 
 	NFA&& operator*() &&;
+
+	void eps_closure(int state);
 
 	void print();
 
