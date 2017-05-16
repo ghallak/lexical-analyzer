@@ -90,19 +90,6 @@ DFA::DFA(const NFA& nfa)
 						});
 				};
 
-			// returns true if two boolean vectors have the same size
-			// and are equal element-wise
-			auto cmp_bool_vector = [](std::vector<bool> v1, std::vector<bool> v2)
-			{
-				if (v1.size() != v2.size()) return false;
-
-				for (std::size_t i = 0; i < v1.size(); ++i)
-				{
-					if (v1[i] != v2[i]) return false;
-				}
-				return true;
-			};
-
 			auto t = closures_union(epsilon_closures(delta(q, c)));
 
 			// continue if all elements in t are false
@@ -112,8 +99,8 @@ DFA::DFA(const NFA& nfa)
 			}
 
 			auto dd = std::find_if(dfa.begin(), dfa.end(),
-			                       [&t, cmp_bool_vector](state_closure_pair p)
-			                       { return cmp_bool_vector(p.second, t); });
+			                       [&t](state_closure_pair p)
+			                       { return p.second == t; });
 
 			if (dd == dfa.end())
 			{
