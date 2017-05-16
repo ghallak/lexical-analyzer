@@ -50,6 +50,11 @@ public:
 	 */
 	int transition(int state_number, char c) const;
 
+	/**
+	 * Print the FiniteAutomaton.
+	 */
+	void print() const;
+
 protected:
 	std::vector<std::unique_ptr<State>> states; /**< The states of the FiniteAutomaton */
 };

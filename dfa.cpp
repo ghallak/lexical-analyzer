@@ -6,7 +6,6 @@
 #include <queue>
 #include <numeric>
 #include <algorithm>
-#include <iostream>
 
 DFA::DFA(const NFA& nfa)
 {
@@ -53,7 +52,6 @@ DFA::DFA(const NFA& nfa)
 				{
 					if (!closure[i]) continue;
 
-					// transition (state number, char)
 					auto next_state = nfa.transition(i, c);
 					if (next_state != -1)
 					{
@@ -105,24 +103,17 @@ DFA::DFA(const NFA& nfa)
 				return true;
 			};
 
-			auto all_zeros = [](std::vector<bool> v)
-			{
-				for (std::size_t i = 0; i < v.size(); ++i)
-				{
-					if (v[i]) return false;
-				}
-				return true;
-			};
-
 			auto t = closures_union(epsilon_closures(delta(q, c)));
 
-			if (all_zeros(t)) continue;
+			// continue if all elements in t are false
+			if (std::all_of(t.begin(), t.end(), [](bool b) { return !b; }))
+			{
+				continue;
+			}
 
 			auto dd = std::find_if(dfa.begin(), dfa.end(),
-			                      [&t, cmp_bool_vector](state_closure_pair p)
-			                      {
-			                      	return cmp_bool_vector(p.second, t);
-			                      });
+			                       [&t, cmp_bool_vector](state_closure_pair p)
+			                       { return cmp_bool_vector(p.second, t); });
 
 			if (dd == dfa.end())
 			{
@@ -139,25 +130,8 @@ DFA::DFA(const NFA& nfa)
 		}
 	}
 
-	for (int i = 0; i < (int)states.size(); ++i)
+	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		states[i]->state_number = i;
 	}
 }
-
-void DFA::print() const
-{
-	for (int i = 0; i < (int)states.size(); ++i)
-	{
-		auto p = states[i].get();
-		for (auto s : p->adjacent)
-		{
-			std::cout << "from state #" << p->state_number
-			          << " through: " << (s.first == '\0' ? 'E' : s.first)
-			          << " to state #" << s.second->state_number
-			          << '\n';
-		}
-		std::cout << "--------------\n\n";
-	}
-}
-

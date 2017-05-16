@@ -68,11 +68,6 @@ public:
 	int accepting_state() const
 	{ return tail->state_number; }
 
-	/**
-	 * Print the NFA.
-	 */
-	void print() const;
-
 private:
 	/**
 	 * Construct a NFA from a given regular expression.

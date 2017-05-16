@@ -1,6 +1,5 @@
 #include "nfa.h"
 
-#include <iostream>
 #include <queue>
 #include <algorithm>
 
@@ -119,22 +118,6 @@ std::vector<bool> NFA::eps_closure(int state) const
 		}
 	}
 	return in_closure;
-}
-
-void NFA::print() const
-{
-	for (int i = 0; i < (int)states.size(); ++i)
-	{
-		auto p = states[i].get();
-		for (auto s : p->adjacent)
-		{
-			std::cout << "from state #" << p->state_number
-			          << " through: " << (s.first == '\0' ? 'E' : s.first)
-			          << " to state #" << s.second->state_number
-			          << '\n';
-		}
-		std::cout << "--------------\n\n";
-	}
 }
 
 NFA NFA::construct(const std::string& s, int begin, int end)
