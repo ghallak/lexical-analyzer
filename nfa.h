@@ -5,21 +5,13 @@
 #include <string>
 #include <utility>
 
-/**
- * A class for nondeterministic finite automata.
- */
-class NFA
-{
-private:
-	/**
-	 * A class representing a state of a nondeterministic finite automata.
-	 */
-	struct State
-	{
-		int state_number; /**< unique number for each states */
-		std::vector<std::pair<char, State*>> adjacent; /**< all adjacent states */
-	};
+#include "finite_automaton.h"
 
+/**
+ * A class for nondeterministic finite automaton.
+ */
+class NFA : public FiniteAutomaton
+{
 public:
 	/**
 	 * Construct an empty NFA.
@@ -37,13 +29,6 @@ public:
 	 * Construct a NFA that corresponds to a single character.
 	 */
 	explicit NFA(char c);
-
-	/**
-	 * Check if the NFA is empty.
-	 * @return true if the NFA is empty, and false otherwise.
-	 */
-	bool empty()
-	{ return head == tail && head == nullptr; }
 
 	/**
 	 * Concatenate two NFAs.
@@ -65,13 +50,28 @@ public:
 	/**
 	 * Calculate the epsilon closure for a given state.
 	 * @param state the state to calculate its epsilon closure
+	 * @return boolean vector with true value for each state that is contained the epsilon closure
 	 */
-	void eps_closure(int state);
+	eps_closure_type eps_closure(int state) const;
+
+	/**
+	 * State number for the start state of the NFA.
+	 * @return the state number of the start state
+	 */
+	int start_state() const
+	{ return head->state_number; }
+
+	/**
+	 * State number for the accepting state of the NFA.
+	 * @return the state number of the accepting state
+	 */
+	int accepting_state() const
+	{ return tail->state_number; }
 
 	/**
 	 * Print the NFA.
 	 */
-	void print();
+	void print() const;
 
 private:
 	/**
@@ -89,10 +89,9 @@ private:
 	 * @param idx index to start search after
 	 * @return Index of the first closing paren
 	 */
-	int find_close(const std::string& s, int idx);
+	int find_close(const std::string& s, int idx) const;
 
 private:
 	State *head; /**< The start state for the NFA */
 	State *tail; /**< The accepting state for the NFA */
-	std::vector<std::unique_ptr<State>> states; /**< The states of the NFA */
 };

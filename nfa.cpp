@@ -1,8 +1,8 @@
 #include "nfa.h"
 
 #include <iostream>
-#include <unordered_set>
 #include <queue>
+#include <algorithm>
 
 NFA::NFA(const std::string& s)
 {
@@ -95,12 +95,12 @@ NFA&& NFA::operator*() &&
 	return std::move(*this);
 }
 
-void NFA::eps_closure(int state)
+std::vector<bool> NFA::eps_closure(int state) const
 {
-	std::unordered_set<int> closure_states;
+	std::vector<bool> in_closure(states.size());
 	std::queue<int> q;
 	q.push(state);
-	closure_states.insert(state);
+	in_closure[state] = true;
 	while (!q.empty())
 	{
 		auto current = states[q.front()].get();
@@ -111,21 +111,17 @@ void NFA::eps_closure(int state)
 			{
 				continue;
 			}
-			if (closure_states.find(v.second->state_number) == closure_states.end())
+			if (!in_closure[v.second->state_number])
 			{
-				closure_states.insert(v.second->state_number);
+				in_closure[v.second->state_number] = true;
 				q.push(v.second->state_number);
 			}
 		}
 	}
-
-	for (auto it : closure_states)
-	{
-		std::cout << it << std::endl;
-	}
+	return in_closure;
 }
 
-void NFA::print()
+void NFA::print() const
 {
 	for (int i = 0; i < (int)states.size(); ++i)
 	{
@@ -145,7 +141,7 @@ NFA NFA::construct(const std::string& s, int begin, int end)
 {
 	// TODO: optimize by saving the opening and closing position of each paren
 
-	std::cout << "Constructing: \"" << s.substr(begin, end - begin) << "\"\n";
+	//std::cout << "Constructing: \"" << s.substr(begin, end - begin) << "\"\n";
 
 	NFA current;
 	for (int i = begin; i < end; ++i)
@@ -183,7 +179,7 @@ NFA NFA::construct(const std::string& s, int begin, int end)
 	return current;
 }
 
-int NFA::find_close(const std::string& s, int idx)
+int NFA::find_close(const std::string& s, int idx) const
 {
 	int open = 1;
 

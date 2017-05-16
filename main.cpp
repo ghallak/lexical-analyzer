@@ -1,8 +1,8 @@
 #include "nfa.h"
+#include "dfa.h"
 
 int main()
 {
-	auto nfa = NFA("a(b|c)*");
-	nfa.print();
-	nfa.eps_closure(3);
+	NFA nfa("a(b|c)*");
+	DFA dfa(nfa);
 }
