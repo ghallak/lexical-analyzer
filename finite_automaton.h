@@ -60,4 +60,5 @@ public:
 
 protected:
 	std::vector<std::unique_ptr<State>> states; /**< The states of the FiniteAutomaton */
+	mutable std::vector<char> _alphabet;
 };

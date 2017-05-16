@@ -6,18 +6,19 @@
 
 std::vector<char> FiniteAutomaton::alphabet() const
 {
-	// TODO: store the alphabet in private variable to avoid
-	// multiple calcultions of the same alphabet
-
-	std::unordered_set<char> charset;
-	for (std::size_t i = 0; i < states.size(); ++i)
+	if (_alphabet.empty())
 	{
-		for (auto p : states[i]->transitions)
+		std::unordered_set<char> charset;
+		for (std::size_t i = 0; i < states.size(); ++i)
 		{
-			if (p.first != '\0') charset.insert(p.first);
+			for (auto p : states[i]->transitions)
+			{
+				if (p.first != '\0') charset.insert(p.first);
+			}
 		}
+		_alphabet.assign(charset.begin(), charset.end());
 	}
-	return std::vector<char>(charset.begin(), charset.end());
+	return _alphabet;
 }
 
 int FiniteAutomaton::transition(int state_number, char c) const
