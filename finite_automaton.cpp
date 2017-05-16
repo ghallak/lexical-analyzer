@@ -11,7 +11,7 @@ std::vector<char> FiniteAutomaton::alphabet() const
 		std::unordered_set<char> charset;
 		for (std::size_t i = 0; i < states.size(); ++i)
 		{
-			for (auto p : states[i]->transitions)
+			for (const auto& p : states[i]->transitions())
 			{
 				if (p.first != '\0') charset.insert(p.first);
 			}
@@ -23,14 +23,14 @@ std::vector<char> FiniteAutomaton::alphabet() const
 
 int FiniteAutomaton::transition(int state_number, char c) const
 {
-	auto it = std::find_if(states[state_number]->transitions.begin(),
-	                       states[state_number]->transitions.end(),
-	                       [c](std::pair<char, State*> trans)
+	auto it = std::find_if(states[state_number]->transitions().begin(),
+	                       states[state_number]->transitions().end(),
+	                       [c](State::transition_type trans)
 	                       { return trans.first == c; });
 
-	return it == states[state_number]->transitions.end() ?
+	return it == states[state_number]->transitions().end() ?
 		-1 :
-		it->second->state_number;
+		it->second->state_number();
 }
 
 void FiniteAutomaton::print() const
@@ -38,13 +38,21 @@ void FiniteAutomaton::print() const
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		auto p = states[i].get();
-		for (auto s : p->transitions)
+		for (const auto& s : p->transitions())
 		{
-			std::cout << "from state #" << p->state_number
+			std::cout << "from state #" << p->state_number()
 			          << " through: " << (s.first == '\0' ? 'E' : s.first)
-			          << " to state #" << s.second->state_number
+			          << " to state #" << s.second->state_number()
 			          << '\n';
 		}
 		std::cout << "--------------\n\n";
+	}
+}
+
+void FiniteAutomaton::set_states_numbers() const
+{
+	for (std::size_t i = 0; i < states.size(); ++i)
+	{
+		states[i]->_state_number = i;
 	}
 }

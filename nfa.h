@@ -23,7 +23,8 @@ public:
 	 * Construct a NFA from a given regular expression.
 	 * @param s the regular expression
 	 */
-	explicit NFA(const std::string& s);
+	explicit NFA(const std::string& s)
+	{ *this = construct(s, 0, s.length()); set_states_numbers(); }
 
 	/**
 	 * Construct a NFA that corresponds to a single character.
@@ -59,14 +60,14 @@ public:
 	 * @return the state number of the start state
 	 */
 	int start_state() const
-	{ return head->state_number; }
+	{ return head->state_number(); }
 
 	/**
 	 * State number for the accepting state of the NFA.
 	 * @return the state number of the accepting state
 	 */
 	int accepting_state() const
-	{ return tail->state_number; }
+	{ return tail->state_number(); }
 
 private:
 	/**

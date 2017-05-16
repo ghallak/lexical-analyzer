@@ -11,15 +11,43 @@ class FiniteAutomaton
 {
 protected:
 	/**
+	 * Give unique number to each state of the FiniteAutomaton states.
+	 */
+	void set_states_numbers() const;
+
+	/**
 	 * A class that represents a state of a FiniteAutomaton.
 	 */
-	struct State
+	class State
 	{
-		void add_transition(State* state, char c = '\0')
-		{ transitions.push_back(std::make_pair(c, state)); }
+	public:
+		using transition_type = std::pair<char, const State *>;
 
-		int state_number; /**< unique number for each states */
-		std::vector<std::pair<char, State*>> transitions; /**< all transitions from a state */
+		/**
+		 * Returns The number of the state.
+		 */
+		int state_number() const
+		{ return _state_number; }
+
+		/**
+		 * Returns a const reference to transitions vector.
+		 */
+		const std::vector<transition_type> & transitions() const
+		{ return _transitions; }
+
+		/**
+		 * Adds a transition from the state.
+		 * @param state the state to add a transition to
+		 * @param c the character lable of the transition
+		 */
+		void add_transition(State* state, char c = '\0')
+		{ _transitions.push_back(std::make_pair(c, state)); }
+
+		friend void FiniteAutomaton::set_states_numbers() const;
+
+	private:
+		int _state_number; /**< unique number for each states */
+		std::vector<transition_type> _transitions; /**< all transitions from a state */
 	};
 
 public:

@@ -3,17 +3,6 @@
 #include <queue>
 #include <algorithm>
 
-NFA::NFA(const std::string& s)
-{
-	*this = construct(s, 0, s.length());
-
-	// give a state_number to each state
-	for (std::size_t i = 0; i < states.size(); ++i)
-	{
-		states[i]->state_number = i;
-	}
-}
-
 NFA::NFA(char c)
 {
 	// TODO: SHOULD I EMPLACE OR PUSH BACK ??
@@ -104,16 +93,16 @@ std::vector<bool> NFA::eps_closure(int state) const
 	{
 		auto current = states[q.front()].get();
 		q.pop();
-		for (auto v : current->transitions)
+		for (const auto& v : current->transitions())
 		{
 			if (v.first != '\0')
 			{
 				continue;
 			}
-			if (!in_closure[v.second->state_number])
+			if (!in_closure[v.second->state_number()])
 			{
-				in_closure[v.second->state_number] = true;
-				q.push(v.second->state_number);
+				in_closure[v.second->state_number()] = true;
+				q.push(v.second->state_number());
 			}
 		}
 	}

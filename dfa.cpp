@@ -117,8 +117,5 @@ DFA::DFA(const NFA& nfa)
 		}
 	}
 
-	for (std::size_t i = 0; i < states.size(); ++i)
-	{
-		states[i]->state_number = i;
-	}
+	set_states_numbers();
 }
