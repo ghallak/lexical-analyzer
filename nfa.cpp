@@ -8,7 +8,7 @@ NFA::NFA(const std::string& s)
 	*this = construct(s, 0, s.length());
 
 	// give a state_number to each state
-	for (int i = 0; i < (int)states.size(); ++i)
+	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		states[i]->state_number = i;
 	}
@@ -23,7 +23,7 @@ NFA::NFA(char c)
 	head = states.front().get();
 	tail = states.back().get();
 
-	head->adjacent.push_back(std::make_pair(c, tail));
+	head->add_transition(tail, c);
 }
 
 NFA& NFA::operator+=(NFA&& rhs)
@@ -34,7 +34,7 @@ NFA& NFA::operator+=(NFA&& rhs)
 	}
 	else
 	{
-		tail->adjacent.push_back(std::make_pair('\0', rhs.head));
+		tail->add_transition(rhs.head);
 		tail = rhs.tail;
 
 		states.insert(states.end(),
@@ -58,11 +58,11 @@ NFA& NFA::operator|=(NFA&& rhs)
 		states.emplace_back(std::make_unique<State>());
 		auto new_tail = states.back().get();
 
-		new_head->adjacent.push_back(std::make_pair('\0', head));
-		new_head->adjacent.push_back(std::make_pair('\0', rhs.head));
+		new_head->add_transition(head);
+		new_head->add_transition(rhs.head);
 
-		tail->adjacent.push_back(std::make_pair('\0', new_tail));
-		rhs.tail->adjacent.push_back(std::make_pair('\0', new_tail));
+		tail->add_transition(new_tail);
+		rhs.tail->add_transition(new_tail);
 
 		head = new_head;
 		tail = new_tail;
@@ -82,10 +82,10 @@ NFA&& NFA::operator*() &&
 	states.emplace_back(std::make_unique<State>());
 	auto new_tail = states.back().get();
 
-	tail->adjacent.push_back(std::make_pair('\0', head));
-	tail->adjacent.push_back(std::make_pair('\0', new_tail));
-	new_head->adjacent.push_back(std::make_pair('\0', head));
-	new_head->adjacent.push_back(std::make_pair('\0', new_tail));
+	tail->add_transition(head);
+	tail->add_transition(new_tail);
+	new_head->add_transition(head);
+	new_head->add_transition(new_tail);
 
 	head = new_head;
 	tail = new_tail;
@@ -104,7 +104,7 @@ std::vector<bool> NFA::eps_closure(int state) const
 	{
 		auto current = states[q.front()].get();
 		q.pop();
-		for (auto v : current->adjacent)
+		for (auto v : current->transitions)
 		{
 			if (v.first != '\0')
 			{

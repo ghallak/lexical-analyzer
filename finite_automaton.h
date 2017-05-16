@@ -15,8 +15,11 @@ protected:
 	 */
 	struct State
 	{
+		void add_transition(State* state, char c = '\0')
+		{ transitions.push_back(std::make_pair(c, state)); }
+
 		int state_number; /**< unique number for each states */
-		std::vector<std::pair<char, State*>> adjacent; /**< all adjacent states */
+		std::vector<std::pair<char, State*>> transitions; /**< all transitions from a state */
 	};
 
 public:

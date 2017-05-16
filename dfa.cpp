@@ -121,11 +121,11 @@ DFA::DFA(const NFA& nfa)
 				auto new_state = states.back().get();
 				dfa.push_back(make_pair(new_state, t));
 				work_list.push(make_pair(new_state, t));
-				d->adjacent.push_back(std::make_pair(c, new_state));
+				d->add_transition(new_state, c);
 			}
 			else
 			{
-				d->adjacent.push_back(std::make_pair(c, dd->first));
+				d->add_transition(dd->first, c);
 			}
 		}
 	}

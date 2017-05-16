@@ -12,7 +12,7 @@ std::vector<char> FiniteAutomaton::alphabet() const
 	std::unordered_set<char> charset;
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
-		for (auto p : states[i]->adjacent)
+		for (auto p : states[i]->transitions)
 		{
 			if (p.first != '\0') charset.insert(p.first);
 		}
@@ -22,12 +22,12 @@ std::vector<char> FiniteAutomaton::alphabet() const
 
 int FiniteAutomaton::transition(int state_number, char c) const
 {
-	auto it = std::find_if(states[state_number]->adjacent.begin(),
-	                       states[state_number]->adjacent.end(),
+	auto it = std::find_if(states[state_number]->transitions.begin(),
+	                       states[state_number]->transitions.end(),
 	                       [c](std::pair<char, State*> trans)
 	                       { return trans.first == c; });
 
-	return it == states[state_number]->adjacent.end() ?
+	return it == states[state_number]->transitions.end() ?
 		-1 :
 		it->second->state_number;
 }
@@ -37,7 +37,7 @@ void FiniteAutomaton::print() const
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		auto p = states[i].get();
-		for (auto s : p->adjacent)
+		for (auto s : p->transitions)
 		{
 			std::cout << "from state #" << p->state_number
 			          << " through: " << (s.first == '\0' ? 'E' : s.first)
