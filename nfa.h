@@ -79,14 +79,16 @@ private:
 	NFA construct(const std::string& s, int begin, int end);
 
 	/**
-	 * Find the first closing paren after a given index.
+	 * The index of the closing paren of an open paren at a given index.
 	 * @param s the string to search in
 	 * @param idx index to start search after
-	 * @return Index of the first closing paren
+	 * @return Index of the closing paren
 	 */
-	int find_close(const std::string& s, int idx) const;
+	int close_index(const std::string& s, int idx) const;
 
 private:
 	State *head; /**< The start state for the NFA */
 	State *tail; /**< The accepting state for the NFA */
+
+	mutable std::vector<int> _close_index; /**< Cached values for close_index */
 };

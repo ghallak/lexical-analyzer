@@ -122,10 +122,6 @@ std::vector<bool> NFA::eps_closure(int state) const
 
 NFA NFA::construct(const std::string& s, int begin, int end)
 {
-	// TODO: optimize by saving the opening and closing position of each paren
-
-	//std::cout << "Constructing: \"" << s.substr(begin, end - begin) << "\"\n";
-
 	NFA current;
 	for (int i = begin; i < end; ++i)
 	{
@@ -136,7 +132,7 @@ NFA NFA::construct(const std::string& s, int begin, int end)
 		}
 		else if (s[i] == '(')
 		{
-			int close = find_close(s, i);
+			int close = close_index(s, i);
 			if (close + 1 < end && s[close + 1] == '*')
 			{
 				current += *construct(s, i + 1, close);
@@ -162,23 +158,30 @@ NFA NFA::construct(const std::string& s, int begin, int end)
 	return current;
 }
 
-int NFA::find_close(const std::string& s, int idx) const
+int NFA::close_index(const std::string& s, int idx) const
 {
-	int open = 1;
-
-	for (int i = idx + 1; i < (int)s.length(); ++i)
+	if (_close_index.empty())
 	{
-		switch (s[i])
-		{
-			case '(': ++open; break;
-			case ')': --open; break;
-		}
+		_close_index.resize(s.length(), -1);
 
-		if (open == 0)
+		std::vector<int> stack;
+		for (std::size_t i = 0; i < s.length(); ++i)
 		{
-			return i;
+			switch (s[i])
+			{
+				case '(':
+				{
+					stack.push_back(i);
+					break;
+				}
+				case ')':
+				{
+					_close_index[stack.back()] = i;
+					stack.pop_back();
+					break;
+				}
+			}
 		}
 	}
-
-	throw std::exception();
+	return _close_index[idx];
 }
