@@ -13,7 +13,7 @@ protected:
 	/**
 	 * Give unique number to each state of the FiniteAutomaton states.
 	 */
-	void set_states_numbers() const;
+	void set_states_numbers();
 
 	/**
 	 * A class that represents a state of a FiniteAutomaton.
@@ -43,7 +43,16 @@ protected:
 		void add_transition(State* state, char c = '\0')
 		{ _transitions.push_back(std::make_pair(c, state)); }
 
-		friend void FiniteAutomaton::set_states_numbers() const;
+		/**
+		 * Updates the transition at a given index.
+		 * @param idx the given index
+		 * @param state the new state
+		 * @param c the new character
+		 */
+		void update_transition(std::size_t idx, State* state, char c)
+		{ _transitions[idx].first = c; _transitions[idx].second = state; }
+
+		friend void FiniteAutomaton::set_states_numbers();
 
 	private:
 		int _state_number; /**< unique number for each states */
@@ -58,7 +67,7 @@ public:
 	 * @return true when the FiniteAutomaton is empty, and false otherwise.
 	 */
 	bool empty() const
-	{ return states_count() == 0; }
+	{ return states.empty(); }
 
 	/**
 	 * The number of states in the automaton.
@@ -71,7 +80,7 @@ public:
 	 * Getter for the alphabet of the FiniteAutomaton.
 	 * @return the alphabet of the FiniteAutomaton
 	 */
-	std::vector<char> alphabet() const;
+	const std::vector<char> & alphabet() const;
 
 	/**
 	 * Transition from a state to another though a character

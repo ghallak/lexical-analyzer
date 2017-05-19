@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <iostream>
 
-std::vector<char> FiniteAutomaton::alphabet() const
+const std::vector<char> & FiniteAutomaton::alphabet() const
 {
 	if (_alphabet.empty())
 	{
@@ -49,7 +49,7 @@ void FiniteAutomaton::print() const
 	}
 }
 
-void FiniteAutomaton::set_states_numbers() const
+void FiniteAutomaton::set_states_numbers()
 {
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{

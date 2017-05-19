@@ -6,6 +6,7 @@
 #include <queue>
 #include <numeric>
 #include <algorithm>
+#include <unordered_map>
 
 DFA::DFA(const NFA& nfa)
 {
@@ -116,6 +117,94 @@ DFA::DFA(const NFA& nfa)
 			}
 		}
 	}
+
+	set_states_numbers();
+}
+
+void DFA::minimize()
+{
+	// Initially: partition 0 is for non-accepting states
+	//            partition 1 is for acception states
+	int parts_count = 2;
+	std::vector<int> part(states.size());
+	for (const auto& tail : tails)
+	{
+		part[tail->state_number()] = 1;
+	}
+
+	int old_parts_count = -1;
+	while (old_parts_count != parts_count)
+	{
+		old_parts_count = parts_count;
+
+		// Iterate over partitions
+		for (int current_part = 0; current_part < parts_count; ++current_part)
+		{
+			// Iterate over characters of the alphabet
+			for (auto c : alphabet())
+			{
+				std::unordered_map<int, int> to; // from next_part to new partitoin number
+
+				// Iterate over states inside one partition
+				for (std::size_t current_state = 0;
+				     current_state < states.size();
+				     ++current_state)
+				{
+					if (part[current_state] != current_part) continue;
+
+					auto next_state = transition(current_state, c);
+					auto next_part = next_state == -1 ? -1 : part[next_state];
+
+					if (to.empty())
+					{
+						to[next_part] = current_part;
+					}
+					else if (to.find(next_part) == to.end())
+					{
+						to[next_part] = parts_count++; // new partition number
+					}
+
+					part[current_state] = to[next_part];
+				}
+			}
+		}
+	}
+
+	update_dfa(part, parts_count);
+}
+
+void DFA::update_dfa(const std::vector<int> & part, int parts_count)
+{
+	std::vector<std::unique_ptr<State>> new_states(parts_count);
+
+	for (std::size_t state_id = 0; state_id < states.size(); ++state_id)
+	{
+		if (new_states[part[state_id]] == nullptr)
+		{
+			new_states[part[state_id]] = std::move(states[state_id]);
+		}
+	}
+
+	for (auto& state : new_states)
+	{
+		const auto& trans = state->transitions();
+
+		for (std::size_t i = 0; i < trans.size(); ++i)
+		{
+			auto state_id = trans[i].second->state_number();
+
+			// If a state belongs to old states (not nullptr), update it
+			if (states[state_id] != nullptr)
+			{
+				state->update_transition(i,
+				                         new_states[part[state_id]].get(),
+				                         trans[i].first);
+			}
+		}
+	}
+
+	states.assign(std::make_move_iterator(new_states.begin()),
+	              std::make_move_iterator(new_states.end()));
 
 	set_states_numbers();
 }
