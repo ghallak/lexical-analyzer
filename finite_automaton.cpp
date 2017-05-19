@@ -21,16 +21,16 @@ const std::vector<char> & FiniteAutomaton::alphabet() const
 	return _alphabet;
 }
 
-int FiniteAutomaton::transition(int state_number, char c) const
+int FiniteAutomaton::transition(int state_id, char c) const
 {
-	auto it = std::find_if(states[state_number]->transitions().begin(),
-	                       states[state_number]->transitions().end(),
+	auto it = std::find_if(states[state_id]->transitions().begin(),
+	                       states[state_id]->transitions().end(),
 	                       [c](State::transition_type trans)
 	                       { return trans.first == c; });
 
-	return it == states[state_number]->transitions().end() ?
+	return it == states[state_id]->transitions().end() ?
 		-1 :
-		it->second->state_number();
+		it->second->state_id();
 }
 
 void FiniteAutomaton::print() const
@@ -40,19 +40,19 @@ void FiniteAutomaton::print() const
 		auto p = states[i].get();
 		for (const auto& s : p->transitions())
 		{
-			std::cout << "from state #" << p->state_number()
+			std::cout << "from state #" << p->state_id()
 			          << " through: " << (s.first == '\0' ? 'E' : s.first)
-			          << " to state #" << s.second->state_number()
+			          << " to state #" << s.second->state_id()
 			          << '\n';
 		}
 		std::cout << "--------------\n\n";
 	}
 }
 
-void FiniteAutomaton::set_states_numbers()
+void FiniteAutomaton::set_states_ids()
 {
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
-		states[i]->_state_number = i;
+		states[i]->_state_id = i;
 	}
 }

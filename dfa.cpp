@@ -118,7 +118,7 @@ DFA::DFA(const NFA& nfa)
 		}
 	}
 
-	set_states_numbers();
+	set_states_ids();
 }
 
 void DFA::minimize()
@@ -129,7 +129,7 @@ void DFA::minimize()
 	std::vector<int> part(states.size());
 	for (const auto& tail : tails)
 	{
-		part[tail->state_number()] = 1;
+		part[tail->state_id()] = 1;
 	}
 
 	int old_parts_count = -1;
@@ -143,16 +143,14 @@ void DFA::minimize()
 			// Iterate over characters of the alphabet
 			for (auto c : alphabet())
 			{
-				std::unordered_map<int, int> to; // from next_part to new partitoin number
+				std::unordered_map<int, int> to; // from next_part to new partition number
 
 				// Iterate over states inside one partition
-				for (std::size_t current_state = 0;
-				     current_state < states.size();
-				     ++current_state)
+				for (std::size_t state_id = 0; state_id < states.size(); ++state_id)
 				{
-					if (part[current_state] != current_part) continue;
+					if (part[state_id] != current_part) continue;
 
-					auto next_state = transition(current_state, c);
+					auto next_state = transition(state_id, c);
 					auto next_part = next_state == -1 ? -1 : part[next_state];
 
 					if (to.empty())
@@ -164,7 +162,7 @@ void DFA::minimize()
 						to[next_part] = parts_count++; // new partition number
 					}
 
-					part[current_state] = to[next_part];
+					part[state_id] = to[next_part];
 				}
 			}
 		}
@@ -191,7 +189,7 @@ void DFA::update_dfa(const std::vector<int> & part, int parts_count)
 
 		for (std::size_t i = 0; i < trans.size(); ++i)
 		{
-			auto state_id = trans[i].second->state_number();
+			auto state_id = trans[i].second->state_id();
 
 			// If a state belongs to old states (not nullptr), update it
 			if (states[state_id] != nullptr)
@@ -206,5 +204,5 @@ void DFA::update_dfa(const std::vector<int> & part, int parts_count)
 	states.assign(std::make_move_iterator(new_states.begin()),
 	              std::make_move_iterator(new_states.end()));
 
-	set_states_numbers();
+	set_states_ids();
 }

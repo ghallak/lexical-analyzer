@@ -11,9 +11,9 @@ class FiniteAutomaton
 {
 protected:
 	/**
-	 * Give unique number to each state of the FiniteAutomaton states.
+	 * Give unique id to each state of the FiniteAutomaton states.
 	 */
-	void set_states_numbers();
+	void set_states_ids();
 
 	/**
 	 * A class that represents a state of a FiniteAutomaton.
@@ -24,10 +24,10 @@ protected:
 		using transition_type = std::pair<char, const State *>;
 
 		/**
-		 * Returns The number of the state.
+		 * Returns the id of the state.
 		 */
-		int state_number() const
-		{ return _state_number; }
+		int state_id() const
+		{ return _state_id; }
 
 		/**
 		 * Returns a const reference to transitions vector.
@@ -52,10 +52,10 @@ protected:
 		void update_transition(std::size_t idx, State* state, char c)
 		{ _transitions[idx].first = c; _transitions[idx].second = state; }
 
-		friend void FiniteAutomaton::set_states_numbers();
+		friend void FiniteAutomaton::set_states_ids();
 
 	private:
-		int _state_number; /**< unique number for each states */
+		int _state_id; /**< unique id for each states */
 		std::vector<transition_type> _transitions; /**< all transitions from a state */
 	};
 
@@ -84,11 +84,11 @@ public:
 
 	/**
 	 * Transition from a state to another though a character
-	 * @param state_number the number of the states to look from
+	 * @param state_id the id of the state to look from
 	 * @param c the character of the transition
-	 * @return the number of the founded state and -1 if no state is found
+	 * @return the id of the founded state and -1 if no state is found
 	 */
-	int transition(int state_number, char c) const;
+	int transition(int state_id, char c) const;
 
 	/**
 	 * Print the FiniteAutomaton.

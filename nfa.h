@@ -24,7 +24,7 @@ public:
 	 * @param s the regular expression
 	 */
 	explicit NFA(const std::string& s)
-	{ *this = construct(s, 0, s.length()); set_states_numbers(); }
+	{ *this = construct(s, 0, s.length()); set_states_ids(); }
 
 	/**
 	 * Construct a NFA that corresponds to a single character.
@@ -56,18 +56,18 @@ public:
 	eps_closure_type eps_closure(int state) const;
 
 	/**
-	 * State number for the start state of the NFA.
-	 * @return the state number of the start state
+	 * State id for the start state of the NFA.
+	 * @return the state id of the start state
 	 */
 	int start_state() const
-	{ return head->state_number(); }
+	{ return head->state_id(); }
 
 	/**
-	 * State number for the accepting state of the NFA.
-	 * @return the state number of the accepting state
+	 * State id for the accepting state of the NFA.
+	 * @return the state id of the accepting state
 	 */
 	int accepting_state() const
-	{ return tail->state_number(); }
+	{ return tail->state_id(); }
 
 private:
 	/**

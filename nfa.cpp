@@ -99,10 +99,10 @@ std::vector<bool> NFA::eps_closure(int state) const
 			{
 				continue;
 			}
-			if (!in_closure[v.second->state_number()])
+			if (!in_closure[v.second->state_id()])
 			{
-				in_closure[v.second->state_number()] = true;
-				q.push(v.second->state_number());
+				in_closure[v.second->state_id()] = true;
+				q.push(v.second->state_id());
 			}
 		}
 	}
