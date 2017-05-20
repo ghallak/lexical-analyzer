@@ -5,7 +5,6 @@
 
 NFA::NFA(const symbol_type & symbol)
 {
-	// TODO: SHOULD I EMPLACE OR PUSH BACK ??
 	states.emplace_back(std::make_unique<State>());
 	states.emplace_back(std::make_unique<State>());
 
@@ -87,7 +86,7 @@ std::vector<bool> NFA::eps_closure(int state) const
 {
 	std::vector<bool> in_closure(states.size());
 	std::queue<int> q;
-	q.push(state);
+	q.emplace(state);
 	in_closure[state] = true;
 	while (!q.empty())
 	{
@@ -102,7 +101,7 @@ std::vector<bool> NFA::eps_closure(int state) const
 			if (!in_closure[v.state()->state_id()])
 			{
 				in_closure[v.state()->state_id()] = true;
-				q.push(v.state()->state_id());
+				q.emplace(v.state()->state_id());
 			}
 		}
 	}
@@ -158,7 +157,7 @@ int NFA::close_index(const std::vector<symbol_type> & symbols, int idx) const
 		{
 			if (symbols[i].is_open_paren())
 			{
-				stack.push_back(i);
+				stack.emplace_back(i);
 			}
 			else if (symbols[i].is_close_paren())
 			{

@@ -12,18 +12,18 @@ DFA::DFA(const NFA & nfa)
 {
 	using state_closure_pair = std::pair<State*, eps_closure_type>;
 
-	states.push_back(std::make_unique<State>());
+	states.emplace_back(std::make_unique<State>());
 	auto q0 = nfa.eps_closure(nfa.start_state());
 	auto d0 = states.back().get();
-	auto p0 = make_pair(d0, q0);
+	auto p0 = std::make_pair(d0, q0);
 
 	head = d0;
 
 	std::vector<state_closure_pair> dfa;
-	dfa.push_back(p0);
+	dfa.emplace_back(p0);
 
 	std::queue<state_closure_pair> work_list;
-	work_list.push(p0);
+	work_list.emplace(p0);
 
 	while (!work_list.empty())
 	{
@@ -33,7 +33,7 @@ DFA::DFA(const NFA & nfa)
 
 		// if the set that corresponds to the DFA state contains the accepting
 		// state of the NFA then the DFA state is an accepting state
-		if (q[nfa.accepting_state()]) tails.push_back(d);
+		if (q[nfa.accepting_state()]) tails.emplace_back(d);
 
 		work_list.pop();
 
@@ -51,7 +51,7 @@ DFA::DFA(const NFA & nfa)
 					auto next_state = nfa.transition(i, symbol);
 					if (next_state != -1)
 					{
-						states.push_back(next_state);
+						states.emplace_back(next_state);
 					}
 				}
 				return states;
@@ -63,7 +63,7 @@ DFA::DFA(const NFA & nfa)
 				std::vector<eps_closure_type> closures;
 				for (auto state : states)
 				{
-					closures.push_back(nfa.eps_closure(state));
+					closures.emplace_back(nfa.eps_closure(state));
 				}
 				return closures;
 			};
@@ -100,10 +100,10 @@ DFA::DFA(const NFA & nfa)
 
 			if (dd == dfa.end())
 			{
-				states.push_back(std::make_unique<State>());
+				states.emplace_back(std::make_unique<State>());
 				auto new_state = states.back().get();
-				dfa.push_back(make_pair(new_state, t));
-				work_list.push(make_pair(new_state, t));
+				dfa.emplace_back(new_state, t);
+				work_list.emplace(new_state, t);
 				d->add_transition(new_state, symbol);
 			}
 			else

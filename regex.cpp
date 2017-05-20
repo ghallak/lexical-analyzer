@@ -98,12 +98,12 @@ Regex::Regex(const std::string & regex)
 	{
 		if (i + 2 < regex.length() && regex[i + 1] == '-')
 		{
-			_symbols.push_back(regex.substr(i, 3));
+			_symbols.emplace_back(regex.substr(i, 3));
 			i += 3;
 		}
 		else
 		{
-			_symbols.push_back(regex[i]);
+			_symbols.emplace_back(regex[i]);
 			++i;
 		}
 	}

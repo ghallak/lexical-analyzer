@@ -69,7 +69,7 @@ protected:
 		 * @param symbol the symbol lable of the transition
 		 */
 		void add_transition(State* state, const symbol_type & symbol = symbol_type())
-		{ _transitions.push_back(Transition(state, symbol)); }
+		{ _transitions.emplace_back(state, symbol); }
 
 		/**
 		 * Updates the transition at a given index.
