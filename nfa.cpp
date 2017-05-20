@@ -95,14 +95,14 @@ std::vector<bool> NFA::eps_closure(int state) const
 		q.pop();
 		for (const auto& v : current->transitions())
 		{
-			if (v.first != '\0')
+			if (v.symbol() != '\0')
 			{
 				continue;
 			}
-			if (!in_closure[v.second->state_id()])
+			if (!in_closure[v.state()->state_id()])
 			{
-				in_closure[v.second->state_id()] = true;
-				q.push(v.second->state_id());
+				in_closure[v.state()->state_id()] = true;
+				q.push(v.state()->state_id());
 			}
 		}
 	}

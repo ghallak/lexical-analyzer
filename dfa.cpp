@@ -189,14 +189,14 @@ void DFA::update_dfa(const std::vector<int> & part, int parts_count)
 
 		for (std::size_t i = 0; i < trans.size(); ++i)
 		{
-			auto state_id = trans[i].second->state_id();
+			auto state_id = trans[i].state()->state_id();
 
 			// If a state belongs to old states (not nullptr), update it
 			if (states[state_id] != nullptr)
 			{
 				state->update_transition(i,
 				                         new_states[part[state_id]].get(),
-				                         trans[i].first);
+				                         trans[i].symbol());
 			}
 		}
 	}
