@@ -4,13 +4,21 @@
 #include <utility>
 #include <memory>
 
+#include "regex.h"
+
+/////////DELETE LATER//////////////
+#include <iostream>
+using std::cout;
+using std::endl;
+///////////////////////////////////
+
 /**
  * A class for finite automaton.
  */
 class FiniteAutomaton
 {
 public:
-	using symbol_type = char;
+	using symbol_type = Regex::Symbol;
 	using eps_closure_type = std::vector<bool>;
 
 protected:
@@ -27,7 +35,7 @@ protected:
 	private:
 		struct Transition
 		{
-			Transition(State* state, symbol_type symbol)
+			Transition(const State* state, const symbol_type & symbol)
 				: _state(state), _symbol(symbol)
 			{ }
 
@@ -58,19 +66,19 @@ protected:
 		/**
 		 * Adds a transition from the state.
 		 * @param state the state to add a transition to
-		 * @param c the symbol lable of the transition
+		 * @param symbol the symbol lable of the transition
 		 */
-		void add_transition(State* state, symbol_type c = '\0')
-		{ _transitions.push_back(Transition(state, c)); }
+		void add_transition(State* state, const symbol_type & symbol = symbol_type())
+		{ _transitions.push_back(Transition(state, symbol)); }
 
 		/**
 		 * Updates the transition at a given index.
 		 * @param idx the given index
 		 * @param state the new state
-		 * @param c the new symbol
+		 * @param symbol the new symbol
 		 */
-		void update_transition(std::size_t idx, State* state, symbol_type c)
-		{ _transitions[idx] = Transition(state, c); }
+		void update_transition(std::size_t idx, State* state, const symbol_type & symbol)
+		{ _transitions[idx] = Transition(state, symbol); }
 
 		friend void FiniteAutomaton::set_states_ids();
 
@@ -101,12 +109,12 @@ public:
 	const std::vector<symbol_type> & alphabet() const;
 
 	/**
-	 * Transition from a state to another though a character
+	 * Transition from a state to another through a symbol
 	 * @param state_id the id of the state to look from
-	 * @param c the symbol of the transition
+	 * @param symbol the symbol of the transition
 	 * @return the id of the founded state and -1 if no state is found
 	 */
-	int transition(int state_id, symbol_type c) const;
+	int transition(int state_id, const symbol_type & symbol) const;
 
 	/**
 	 * Print the FiniteAutomaton.

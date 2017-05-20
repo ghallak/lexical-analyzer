@@ -1,15 +1,18 @@
 #include "nfa.h"
 #include "dfa.h"
+#include "regex.h"
 
 int main()
 {
-	/*NFA nfa("a(b|c)*");
-	DFA dfa(nfa);
-	dfa.minimize();*/
+	//NFA nfa("a(b|c)*");
+	//DFA dfa(nfa);
+	//dfa.minimize();
 
-	NFA nfa("fee|fie");
+	//std::string regex ="fee|fie";
+	Regex regex("a-zba");
+	NFA nfa(regex);
 	DFA dfa(nfa);
-	dfa.print();
+	nfa.print();
 	dfa.minimize();
 	dfa.print();
 }

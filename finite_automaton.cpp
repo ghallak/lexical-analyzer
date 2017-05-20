@@ -8,25 +8,25 @@ const std::vector<FiniteAutomaton::symbol_type> & FiniteAutomaton::alphabet() co
 {
 	if (_alphabet.empty())
 	{
-		std::unordered_set<symbol_type> charset;
+		std::unordered_set<symbol_type> symbolset;
 		for (std::size_t i = 0; i < states.size(); ++i)
 		{
 			for (const auto& p : states[i]->transitions())
 			{
-				if (p.symbol() != '\0') charset.insert(p.symbol());
+				if (!p.symbol().is_epsilon()) symbolset.insert(p.symbol());
 			}
 		}
-		_alphabet.assign(charset.begin(), charset.end());
+		_alphabet.assign(symbolset.begin(), symbolset.end());
 	}
 	return _alphabet;
 }
 
-int FiniteAutomaton::transition(int state_id, symbol_type c) const
+int FiniteAutomaton::transition(int state_id, const symbol_type & symbol) const
 {
 	auto it = std::find_if(states[state_id]->transitions().begin(),
 	                       states[state_id]->transitions().end(),
-	                       [c](auto trans)
-	                       { return trans.symbol() == c; });
+	                       [symbol](auto trans)
+	                       { return trans.symbol() == symbol; });
 
 	return it == states[state_id]->transitions().end() ?
 		-1 :
@@ -38,11 +38,11 @@ void FiniteAutomaton::print() const
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		auto p = states[i].get();
-		for (const auto& s : p->transitions())
+		for (const auto& trans : p->transitions())
 		{
 			std::cout << "from state #" << p->state_id()
-			          << " through: " << (s.symbol() == '\0' ? 'E' : s.symbol())
-			          << " to state #" << s.state()->state_id()
+			          << " through: " << (trans.symbol().is_epsilon() ? "epsilon" : trans.symbol().to_string())
+			          << " to state #" << trans.state()->state_id()
 			          << '\n';
 		}
 		std::cout << "--------------\n\n";

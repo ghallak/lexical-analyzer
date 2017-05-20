@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "finite_automaton.h"
+#include "regex.h"
 
 /**
  * A class for nondeterministic finite automaton.
@@ -21,15 +22,10 @@ public:
 
 	/**
 	 * Construct a NFA from a given regular expression.
-	 * @param s the regular expression
+	 * @param regex the regular expression
 	 */
-	explicit NFA(const std::string& s)
-	{ *this = construct(s, 0, s.length()); set_states_ids(); }
-
-	/**
-	 * Construct a NFA that corresponds to a single character.
-	 */
-	explicit NFA(char c);
+	explicit NFA(const Regex& regex)
+	{ *this = construct(regex.symbols(), 0, regex.symbols().size()); set_states_ids(); }
 
 	/**
 	 * Concatenate two NFAs.
@@ -71,21 +67,26 @@ public:
 
 private:
 	/**
+	 * Construct a NFA that corresponds to a single symbol.
+	 */
+	explicit NFA(const symbol_type & symbol);
+
+	/**
 	 * Construct a NFA from a given regular expression.
-	 * @param s the given regular expression
+	 * @param symbols symbols of the given regular expression
 	 * @param begin beginning of the regular expression
 	 * @param end end of the regular expression + 1
 	 * @return A NFA that corresponds to the given regular expression
 	 */
-	NFA construct(const std::string& s, int begin, int end);
+	NFA construct(const std::vector<symbol_type> & symbols, int begin, int end);
 
 	/**
 	 * The index of the closing paren of an open paren at a given index.
-	 * @param s the string to search in
+	 * @param symbols the regular expression's symbols to search in
 	 * @param idx index to start search after
 	 * @return Index of the closing paren
 	 */
-	int close_index(const std::string& s, int idx) const;
+	int close_index(const std::vector<symbol_type> & symbols, int idx) const;
 
 private:
 	State *head; /**< The start state for the NFA */

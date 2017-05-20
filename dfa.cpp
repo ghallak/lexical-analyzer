@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-DFA::DFA(const NFA& nfa)
+DFA::DFA(const NFA & nfa)
 {
 	using state_closure_pair = std::pair<State*, eps_closure_type>;
 
@@ -37,23 +37,18 @@ DFA::DFA(const NFA& nfa)
 
 		work_list.pop();
 
-		for (auto c : nfa.alphabet())
+		for (auto symbol : nfa.alphabet())
 		{
 			auto states_count = nfa.states_count();
 
-			// iterate through each state from q and see if it has
-			// transition through character c.
-			// if it has, then compute the epsilon closure to the state
-			// that results from the transition.
-
-			auto delta = [&nfa, states_count](eps_closure_type closure, char c)
+			auto delta = [&nfa, states_count](eps_closure_type closure, symbol_type symbol)
 			{
 				std::vector<int> states;
 				for (int i = 0; i < states_count; ++i)
 				{
 					if (!closure[i]) continue;
 
-					auto next_state = nfa.transition(i, c);
+					auto next_state = nfa.transition(i, symbol);
 					if (next_state != -1)
 					{
 						states.push_back(next_state);
@@ -80,7 +75,7 @@ DFA::DFA(const NFA& nfa)
 					return std::accumulate(
 						closures.begin(), closures.end(),
 						eps_closure_type(states_count),
-						[](eps_closure_type closure1, eps_closure_type closure2)
+ 						[](eps_closure_type closure1, eps_closure_type closure2)
 						{
 							eps_closure_type result(closure1.size());
 							for (std::size_t i = 0; i < result.size(); ++i)
@@ -91,7 +86,7 @@ DFA::DFA(const NFA& nfa)
 						});
 				};
 
-			auto t = closures_union(epsilon_closures(delta(q, c)));
+			auto t = closures_union(epsilon_closures(delta(q, symbol)));
 
 			// continue if all elements in t are false
 			if (std::all_of(t.begin(), t.end(), [](bool b) { return !b; }))
@@ -109,11 +104,11 @@ DFA::DFA(const NFA& nfa)
 				auto new_state = states.back().get();
 				dfa.push_back(make_pair(new_state, t));
 				work_list.push(make_pair(new_state, t));
-				d->add_transition(new_state, c);
+				d->add_transition(new_state, symbol);
 			}
 			else
 			{
-				d->add_transition(dd->first, c);
+				d->add_transition(dd->first, symbol);
 			}
 		}
 	}
@@ -140,8 +135,8 @@ void DFA::minimize()
 		// Iterate over partitions
 		for (int current_part = 0; current_part < parts_count; ++current_part)
 		{
-			// Iterate over characters of the alphabet
-			for (auto c : alphabet())
+			// Iterate over symbols of the alphabet
+			for (auto symbol : alphabet())
 			{
 				std::unordered_map<int, int> to; // from next_part to new partition number
 
@@ -150,7 +145,7 @@ void DFA::minimize()
 				{
 					if (part[state_id] != current_part) continue;
 
-					auto next_state = transition(state_id, c);
+					auto next_state = transition(state_id, symbol);
 					auto next_part = next_state == -1 ? -1 : part[next_state];
 
 					if (to.empty())

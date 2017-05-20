@@ -3,7 +3,7 @@
 #include <queue>
 #include <algorithm>
 
-NFA::NFA(char c)
+NFA::NFA(const symbol_type & symbol)
 {
 	// TODO: SHOULD I EMPLACE OR PUSH BACK ??
 	states.emplace_back(std::make_unique<State>());
@@ -12,7 +12,7 @@ NFA::NFA(char c)
 	head = states.front().get();
 	tail = states.back().get();
 
-	head->add_transition(tail, c);
+	head->add_transition(tail, symbol);
 }
 
 NFA& NFA::operator+=(NFA&& rhs)
@@ -95,7 +95,7 @@ std::vector<bool> NFA::eps_closure(int state) const
 		q.pop();
 		for (const auto& v : current->transitions())
 		{
-			if (v.symbol() != '\0')
+			if (!v.symbol().is_epsilon())
 			{
 				continue;
 			}
@@ -109,68 +109,64 @@ std::vector<bool> NFA::eps_closure(int state) const
 	return in_closure;
 }
 
-NFA NFA::construct(const std::string& s, int begin, int end)
+NFA NFA::construct(const std::vector<symbol_type>& symbols, int begin, int end)
 {
 	NFA current;
-	for (int i = begin; i < end; ++i)
+	for (std::size_t i = begin; i < end; ++i)
 	{
-		if (s[i] == '|')
+		if (symbols[i].is_union_op())
 		{
-			current |= construct(s, i + 1, end);
+			current |= construct(symbols, i + 1, end);
 			i = end;
 		}
-		else if (s[i] == '(')
+		else if (symbols[i].is_open_paren())
 		{
-			int close = close_index(s, i);
-			if (close + 1 < end && s[close + 1] == '*')
+			auto close = close_index(symbols, i);
+			if (close + 1 < end && symbols[close + 1].is_kleen_star())
 			{
-				current += *construct(s, i + 1, close);
+				current += *construct(symbols, i + 1, close);
 				i = close + 1;
 			}
 			else
 			{
-				current += construct(s, i + 1, close);
+				current += construct(symbols, i + 1, close);
 				i = close;
 			}
 		}
-		else if (i + 1 < end && s[i + 1] == '*')
+		else if (i + 1 < end && symbols[i + 1].is_kleen_star())
 		{
-			current += *NFA(s[i]);
+			current += *NFA(symbols[i]);
 			++i;
 		}
 		else
 		{
-			current += NFA(s[i]);
+			current += NFA(symbols[i]);
 		}
 	}
 
 	return current;
 }
 
-int NFA::close_index(const std::string& s, int idx) const
+int NFA::close_index(const std::vector<symbol_type> & symbols, int idx) const
 {
 	if (_close_index.empty())
 	{
-		_close_index.resize(s.length(), -1);
+		_close_index.resize(symbols.size(), -1);
 
 		std::vector<int> stack;
-		for (std::size_t i = 0; i < s.length(); ++i)
+		for (std::size_t i = 0; i < symbols.size(); ++i)
 		{
-			switch (s[i])
+			if (symbols[i].is_open_paren())
 			{
-				case '(':
-				{
-					stack.push_back(i);
-					break;
-				}
-				case ')':
-				{
-					_close_index[stack.back()] = i;
-					stack.pop_back();
-					break;
-				}
+				stack.push_back(i);
+			}
+			else if (symbols[i].is_close_paren())
+			{
+				_close_index[stack.back()] = i;
+				stack.pop_back();
 			}
 		}
 	}
+
 	return _close_index[idx];
 }
