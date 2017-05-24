@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_set>
 
 class Symbol
 {
@@ -79,120 +80,77 @@ private:
 	class Node;
 
 public:
+	using leaf_pos_type = std::size_t;
+	using leaves_set_type = std::unordered_set<leaf_pos_type>;
+
+
 	RegexTree(const std::string& regex);
+
+
+	std::vector<Symbol> alphabet() const;
+
+	leaves_set_type firstpos_root() const
+	{ return root->firstpos; }
+
+	leaves_set_type followpos(leaf_pos_type leaf_pos) const
+	{ return _leaves[leaf_pos]->followpos; }
+
+	Symbol label(leaf_pos_type leaf_pos) const
+	{ return _leaves[leaf_pos]->label(); }
 
 private:
 	enum class NodeType
 	{
-		CONCAT, UNION, STAR, LEAF, NODE
+		CONCAT, UNION, STAR, LEAF
 	};
 
 
 	class Node
 	{
 	public:
+		Node(NodeType type,
+		     std::unique_ptr<Node> left,
+		     std::unique_ptr<Node> right = nullptr);
+
+		Node(NodeType type, Symbol label, leaf_pos_type pos);
+
+
 		bool is_concat() const
-		{ return type() == NodeType::CONCAT; }
+		{ return _type == NodeType::CONCAT; }
 
 		bool is_union() const
-		{ return type() == NodeType::UNION; }
+		{ return _type == NodeType::UNION; }
 
 		bool is_star() const
-		{ return type() == NodeType::STAR; }
+		{ return _type == NodeType::STAR; }
 
-		bool is_symbol() const
-		{ return type() == NodeType::LEAF; }
+		bool is_leaf() const
+		{ return _type == NodeType::LEAF; }
 
-	protected:
-		virtual NodeType type() const
-		{ return NodeType::NODE; }
-	};
+		Node* left() const;
 
-	class NodeFactory
-	{
-	public:
-		static std::unique_ptr<Node> create(
-			NodeType type,
-			std::unique_ptr<Node> left,
-			std::unique_ptr<Node> right = nullptr);
+		Node* right() const;
 
-		static std::unique_ptr<Node> create(NodeType type, Symbol symbol);
-	};
+		Node* child() const;
 
-	class Concat : public Node
-	{
-	public:
-		Concat(std::unique_ptr<Node> left, std::unique_ptr<Node> right)
-			: _right(std::move(right)), _left(std::move(left))
-		{ }
+		leaf_pos_type leaf_pos() const;
 
-		// const Node* left() const
-		// { return _left.get(); }
-		// const Node* right() const
-		// { return _right.get(); }
+		Symbol label() const;
 
-	protected:
-		NodeType type() const override
-		{ return NodeType::CONCAT; }
+
+		bool nullable;
+
+		leaves_set_type firstpos;
+		leaves_set_type lastpos;
+		leaves_set_type followpos;
 
 	private:
-		std::unique_ptr<Node> _right;
-		std::unique_ptr<Node> _left;
-	};
+		NodeType _type;
 
-	class Union : public Node
-	{
-	public:
-		Union(std::unique_ptr<Node> left, std::unique_ptr<Node> right)
-			: _right(std::move(right)), _left(std::move(left))
-		{ }
+		Symbol _label;
+		leaf_pos_type _leaf_pos;
 
-		// const Node* left() const
-		// { return _left.get(); }
-		// const Node* right() const
-		// { return _right.get(); }
-
-	protected:
-		NodeType type() const override
-		{ return NodeType::UNION; }
-
-	private:
-		std::unique_ptr<Node> _right;
-		std::unique_ptr<Node> _left;
-	};
-
-	class Star : public Node
-	{
-	public:
-		Star(std::unique_ptr<Node> child) : _child(std::move(child))
-		{ }
-
-		// const Node* child() const
-		// { return _child.get(); }
-
-	protected:
-		NodeType type() const override
-		{ return NodeType::STAR; }
-
-	private:
-		std::unique_ptr<Node> _child;
-	};
-
-	class Leaf : public Node
-	{
-	public:
-		Leaf(Symbol symbol) : _symbol(symbol)
-		{ }
-
-		// Symbol symbol() const
-		// { return _symbol; }
-
-	protected:
-		NodeType type() const override
-		{ return NodeType::LEAF; }
-
-	private:
-		Symbol _symbol;
+		std::vector<std::unique_ptr<Node>> _children;
 	};
 
 
@@ -202,7 +160,15 @@ private:
 
 	void calc_close_index(const std::vector<Symbol>& symbols);
 
+	void calc_nullable(Node* node);
+
+	void calc_first_last_pos(Node* node);
+
+	void calc_followpos(Node* node);
+
 
 	std::unique_ptr<Node> root;
+
 	std::vector<std::size_t> close_index;
+	std::vector<Node*> _leaves;
 };
