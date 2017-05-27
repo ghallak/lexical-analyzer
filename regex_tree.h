@@ -157,6 +157,20 @@ std::unique_ptr<T> RegexTree::init(
 		return leaf;
 	}
 
+	// ...|...
+	int depth = 0;
+	for (std::size_t i = begin; i < end; ++i)
+	{
+		depth += symbols[i].is_open_paren();
+		depth -= symbols[i].is_close_paren();
+		if (symbols[i].is_union_op() && depth == 0)
+		{
+			return std::make_unique<T>(T::Type::UNION,
+			                           init<T>(symbols, begin, i),
+			                           init<T>(symbols, i + 1, end));
+		}
+	}
+
 	if (symbols[begin].is_open_paren())
 	{
 		auto close = close_index[begin];
@@ -193,20 +207,6 @@ std::unique_ptr<T> RegexTree::init(
 			{
 				return init<T>(symbols, begin + 1, close);
 			}
-		}
-	}
-
-	// ...|...
-	int depth = 0;
-	for (std::size_t i = begin; i < end; ++i)
-	{
-		depth += symbols[i].is_open_paren();
-		depth -= symbols[i].is_close_paren();
-		if (symbols[i].is_union_op() && depth == 0)
-		{
-			return std::make_unique<T>(T::Type::UNION,
-			                           init<T>(symbols, begin, i),
-			                           init<T>(symbols, i + 1, end));
 		}
 	}
 
