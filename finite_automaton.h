@@ -6,12 +6,6 @@
 
 #include "regex.h"
 
-/////////DELETE LATER//////////////
-#include <iostream>
-using std::cout;
-using std::endl;
-///////////////////////////////////
-
 /**
  * A class for finite automaton.
  */
@@ -122,6 +116,18 @@ public:
 	void print() const;
 
 protected:
+	struct AcceptState
+	{
+		AcceptState(State* state, int token_id)
+			: state(state), token_id(token_id)
+		{ }
+
+		State* state;
+		int token_id;
+	};
+
+
 	std::vector<std::unique_ptr<State>> states; /**< The states of the FiniteAutomaton */
+	std::vector<AcceptState> accept_states; /**< The set of accepting states */
 	mutable std::vector<symbol_type> _alphabet; /**< Cached alphabet */
 };
