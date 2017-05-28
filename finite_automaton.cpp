@@ -35,6 +35,12 @@ int FiniteAutomaton::transition(int state_id, const symbol_type & symbol) const
 
 void FiniteAutomaton::print() const
 {
+	std::cout << "Accept states: ";
+	for (auto accept_state : accept_states)
+	{
+		std::cout << accept_state.state->state_id() << ' ';
+	}
+	std::cout << '\n';
 	for (std::size_t i = 0; i < states.size(); ++i)
 	{
 		auto p = states[i].get();
