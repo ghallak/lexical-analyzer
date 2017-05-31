@@ -1,18 +1,16 @@
-#include "nfa.h"
-#include "dfa.h"
 #include "regex.h"
+#include "regex_tree.h"
+#include "dfa.h"
+
+#include <string>
+
+#include <iostream>
+using std::cout;
+using std::endl;
 
 int main()
 {
-	//NFA nfa("a(b|c)*");
-	//DFA dfa(nfa);
-	//dfa.minimize();
-
-	//std::string regex ="fee|fie";
-	Regex regex("a-zba");
-	NFA nfa(regex);
-	DFA dfa(nfa);
-	nfa.print();
-	dfa.minimize();
+	AugmentedRegexTree x(AugmentedRegex("(ab)#|(c)#"));
+	DFA dfa(x);
 	dfa.print();
 }

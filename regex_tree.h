@@ -10,11 +10,19 @@ class RegexTree
 {
 public:
 	using symbol_type = Regex::Symbol;
+	using leaf_pos_type = std::size_t;
+	using regex_id_type = int;
 
 
 	RegexTree() { }
 
 	RegexTree(const Regex& regex);
+
+
+	std::vector<symbol_type> labels() const;
+
+	regex_id_type leaf_regex_id(leaf_pos_type leaf_pos) const
+	{ return _leaves[leaf_pos]->regex_id(); }
 
 protected:
 
@@ -31,7 +39,7 @@ protected:
 		     std::unique_ptr<Node> left,
 		     std::unique_ptr<Node> right = nullptr);
 
-		Node(Type type, symbol_type label);
+		Node(Type type, symbol_type label, regex_id_type regex_id = -1);
 
 
 		bool is_concat() const
@@ -46,6 +54,9 @@ protected:
 		bool is_leaf() const
 		{ return _type == Type::LEAF; }
 
+		regex_id_type regex_id() const
+		{ return _regex_id; }
+
 		virtual Node* left() const;
 
 		virtual Node* right() const;
@@ -58,6 +69,7 @@ protected:
 		Type _type;
 
 		symbol_type _label;
+		regex_id_type _regex_id;
 
 		std::vector<std::unique_ptr<Node>> _children;
 	};
@@ -79,7 +91,6 @@ protected:
 class AugmentedRegexTree : public RegexTree
 {
 public:
-	using leaf_pos_type = std::size_t;
 	using leaves_set_type = std::unordered_set<leaf_pos_type>;
 
 
@@ -151,8 +162,18 @@ std::unique_ptr<T> RegexTree::init(
 	// .
 	if (begin + 1 == end)
 	{
+		// TODO: Move this somewhere else
+		regex_id_type regex_id = -1;
+		if (symbols[begin].to_string() == "#")
+		{
+			for (std::size_t i = 0; i <= begin; ++i)
+			{
+				if (symbols[i] == symbols[begin]) ++regex_id;
+			}
+		}
 		auto leaf =  std::make_unique<T>(T::Type::LEAF,
-		                                 symbols[begin]);
+		                                 symbols[begin],
+		                                 regex_id);
 		_leaves.emplace_back(leaf.get());
 		return leaf;
 	}

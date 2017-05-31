@@ -21,6 +21,9 @@ protected:
 	 */
 	void set_states_ids();
 
+	void set_alphabet(const std::vector<symbol_type>& alphabet)
+	{ _alphabet.assign(alphabet.cbegin(), alphabet.cend()); }
+
 	/**
 	 * A class that represents a state of a FiniteAutomaton.
 	 */

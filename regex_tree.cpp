@@ -11,6 +11,15 @@ RegexTree::RegexTree(const Regex& regex)
 	root = init<Node>(regex.symbols(), 0, regex.symbols().size());
 }
 
+std::vector<RegexTree::symbol_type> RegexTree::labels() const
+{
+	std::unordered_set<symbol_type> result;
+	for (const auto& leaf : _leaves)
+		if (leaf->label().to_string() != "#")
+		result.insert(leaf->label());
+	return std::vector<symbol_type>(result.cbegin(), result.cend());
+}
+
 RegexTree::Node::Node(Type type,
                       std::unique_ptr<Node> left,
                       std::unique_ptr<Node> right)
@@ -32,8 +41,8 @@ RegexTree::Node::Node(Type type,
 	}
 }
 
-RegexTree::Node::Node(Type type, symbol_type label)
-	: _type(type), _label(label)
+RegexTree::Node::Node(Type type, symbol_type label, regex_id_type regex_id)
+	: _type(type), _label(label), _regex_id(regex_id)
 {
 	if (type != Type::LEAF)
 		// TODO: throw exception: can't make node of this type

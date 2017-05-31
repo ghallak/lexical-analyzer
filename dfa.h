@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "finite_automaton.h"
-#include "nfa.h"
+#include "regex_tree.h"
 
 /**
  * A class for deterministic finite automaton.
@@ -12,10 +12,10 @@ class DFA : public FiniteAutomaton
 {
 public:
 	/**
-	 * Subset construction algorithm.
-	 * @param nfa NFA to construct a DFA from
+	 * Convert an augmented regular expression tree directly to DFA
+	 * @param tree augmented regular expression tree
 	 */
-	explicit DFA(const NFA& nfa);
+	explicit DFA(const AugmentedRegexTree& tree);
 
 	/**
 	 * Create minimal DFA using Hopcroft’s Algorithm.
